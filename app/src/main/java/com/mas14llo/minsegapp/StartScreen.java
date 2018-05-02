@@ -29,7 +29,9 @@ public class StartScreen extends AppCompatActivity
 
     //Declare buttons
     Button onOff;
+    Button changeActivity;
     Toolbar toolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,14 @@ public class StartScreen extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 btService.enableDisableBluetooth();
+            }
+        });
+
+        changeActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startIntent = new Intent(getApplicationContext(), PositionControll.class);
+                startActivity(startIntent);
             }
         });
 
@@ -122,6 +132,7 @@ public class StartScreen extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         onOff = (Button) findViewById(R.id.btnONOFF);
+        changeActivity = (Button) findViewById(R.id.changeActivity);
     }
     // ==================== NÄSTLAD KLASS  ======================
 
