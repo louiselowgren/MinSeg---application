@@ -1,8 +1,11 @@
 package com.mas14llo.minsegapp;
 
+import com.mas14llo.minsegapp.BluetoothTestService.LocalBinder;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,23 +15,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.content.ServiceConnection;
+import android.content.ComponentName;
+import static android.content.ContentValues.TAG;
 
 public class StartScreen extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+
+    BluetoothTestService btService;     // this is the connectionlink to the service
+    boolean mBound = false;
+
+    //Declare buttons
+    Button onOff;
+    Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_start_screen);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        // setup window (toolbar, buttons, textviews
+        setupWindow();
+        //Init the connection with the bluetoothService
+        Intent intent = new Intent(this, BluetoothTestService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        //-------------------
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        /**Endable or disable bluetooth on the device*/
+        onOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                btService.enableDisableBluetooth();
             }
         });
 
@@ -98,4 +115,31 @@ public class StartScreen extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void setupWindow(){
+
+        setContentView(R.layout.activity_start_screen);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        onOff = (Button) findViewById(R.id.btnONOFF);
+    }
+    // ==================== NÄSTLAD KLASS  ======================
+
+    /** Defines callbacks for service binding, passed to bindService()
+     Creates the bound between activity and service*/
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            btService = binder.getService();
+            mBound = true;
+            Log.d(TAG, "OnServiceConnected: Is bound!");
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound= false;
+        }
+    };
+
+
 }
