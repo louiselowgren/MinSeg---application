@@ -1,26 +1,37 @@
 package com.mas14llo.minsegapp;
 
+import android.app.ProgressDialog;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.Binder;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
+import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
 
 public class BluetoothTestService extends Service {
     BluetoothAdapter mBluetoothAdapter;
+    BluetoothSocket btSocket;
+    Setup setup;
     private final IBinder mBinder = new LocalBinder();
-
-
     public BluetoothTestService() {
         super();
     }
+
+    //private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
 
     // ==== Methods that needs to be overridden ==============
     // ==== for setup the socket and communication =========
@@ -29,12 +40,19 @@ public class BluetoothTestService extends Service {
         this is done once, when the binding is established*/
     @Override
     public IBinder onBind(Intent intent){
-        Toast.makeText(this, "Binding is completed", Toast.LENGTH_LONG).show();
-        //declare the devices Bluetoothadapter
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //Toast.makeText(this, "Binding is completed", Toast.LENGTH_LONG).show();
+        setup = new Setup(getApplicationContext());
+        //btSocket = setup.setUpBluetooth();
         return mBinder;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i("BluetoothService", "Received start id " + startId + ": " + intent);
+        return START_NOT_STICKY;
+    }
 
     @Override
     public void onDestroy() {
@@ -42,7 +60,10 @@ public class BluetoothTestService extends Service {
         super.onDestroy();
     }
 
-    // =========== methods for clients =====================
+
+
+
+    // =========== methods for clients ==========================
     // ======== to be called from activities ====================
 
     /** Turns bluetooth on or off depending on the devices current mode*/
@@ -67,6 +88,20 @@ public class BluetoothTestService extends Service {
 
         return 1;
     }
+
+
+    public String getAdress(){
+        return setup.getAdress();
+    }
+
+    public String getName(){
+        return setup.getName();
+    }
+
+    public BluetoothSocket getBtSocket(){
+        return btSocket;
+    }
+
     // ================== end of methods for clients ==========================
 
     //nästlad klass
@@ -75,5 +110,7 @@ public class BluetoothTestService extends Service {
             return BluetoothTestService.this;
         }
     }
+
+
 
 }
